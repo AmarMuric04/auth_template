@@ -72,12 +72,14 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error("OTP Send Error:", error);
     return NextResponse.json(
       {
         success: false,
-        message: "Something went wrong while sending the code.",
+        message:
+          error?.message || "Something went wrong while sending the code.",
+        error: error?.stack || error,
       },
       { status: 500 }
     );
