@@ -24,7 +24,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useOTPStore } from "@/store/use-otp-store";
+import { useAuthStore } from "@/store/use-auth-store";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email" }),
@@ -32,7 +32,7 @@ const formSchema = z.object({
 
 export default function SignInForm(): React.JSX.Element {
   const router = useRouter();
-  const { setEmail } = useOTPStore();
+  const { authData, setAuthData } = useAuthStore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,13 +43,13 @@ export default function SignInForm(): React.JSX.Element {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     axios.post("/api/otp/send_otp", JSON.stringify({ email: values.email }));
-    setEmail(values.email);
+    setAuthData({ ...authData, email: values.email });
 
     router.push("/otp");
   }
 
   return (
-    <Card className="w-[450px]">
+    <Card className="w-[450px] glass-3">
       <CardHeader>
         <CardTitle>Sign into an account</CardTitle>
         <CardDescription>Please enter your email</CardDescription>

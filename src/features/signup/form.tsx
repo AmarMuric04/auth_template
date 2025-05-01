@@ -18,8 +18,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useAuthStore } from "@/store/use-auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -33,6 +36,9 @@ const formSchema = z.object({
 });
 
 export default function SignUpForm(): React.JSX.Element {
+  const router = useRouter();
+  const { setAuthData } = useAuthStore();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -44,11 +50,14 @@ export default function SignUpForm(): React.JSX.Element {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    axios.post("/api/otp/send_otp", JSON.stringify({ email: values.email }));
+
+    setAuthData(values);
+    router.push("/otp");
   }
 
   return (
-    <Card className="w-[450px]">
+    <Card className="w-[450px] glass-3">
       <CardHeader>
         <CardTitle>Create an account</CardTitle>
         <CardDescription>Please fill out the form</CardDescription>

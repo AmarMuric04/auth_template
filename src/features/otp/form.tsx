@@ -12,6 +12,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,7 +24,7 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useOTPStore } from "@/store/use-otp-store";
+import { useAuthStore } from "@/store/use-auth-store";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -31,6 +32,8 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   code: z.string().min(6, { message: "Enter the full 6-digit code" }),
@@ -38,7 +41,14 @@ const formSchema = z.object({
 
 export default function OTPForm(): React.JSX.Element {
   const router = useRouter();
-  const { email } = useOTPStore();
+  const { authData, clearAuthData } = useAuthStore();
+  const isVerifyingRef = useRef(false);
+
+  useEffect(() => {
+    if (!authData.email && !isVerifyingRef.current) {
+      router.replace("/signup");
+    }
+  }, [authData, router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,20 +58,36 @@ export default function OTPForm(): React.JSX.Element {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const response = await axios.post("/api/otp/verify_otp", {
-      code: values.code,
-      email,
-    });
+    isVerifyingRef.current = true;
+    try {
+      const { data } = await axios.post("/api/otp/verify_otp", {
+        code: values.code,
+        email: authData.email,
+      });
 
-    if (response.data.success) {
-      router.push("/");
-    } else {
-      console.log("Wrong code!");
+      if (data.success) {
+        await router.push("/");
+        clearAuthData();
+      } else {
+        console.log("Wrong code!");
+        isVerifyingRef.current = false;
+      }
+    } catch (err) {
+      console.error(err);
+      isVerifyingRef.current = false;
     }
   }
 
+  if (!authData.email) {
+    return (
+      <div className="grid place-items-center h-screen animate-spin">
+        <Loader2 />
+      </div>
+    );
+  }
+
   return (
-    <Card className="">
+    <Card className="glass-3">
       <CardHeader>
         <CardTitle>Enter the code</CardTitle>
         <CardDescription>We sent the code to your email</CardDescription>
@@ -95,6 +121,9 @@ export default function OTPForm(): React.JSX.Element {
                       </InputOTPGroup>
                     </InputOTP>
                   </FormControl>
+                  <FormDescription>
+                    This code will expire in 5 minutes
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
