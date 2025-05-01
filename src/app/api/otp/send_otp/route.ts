@@ -3,6 +3,8 @@ import nodemailer from "nodemailer";
 import prisma from "@/lib/prisma";
 import { getRandomNumber } from "@/utility/random-number";
 
+export const runtime = "nodejs";
+
 export async function POST(req: Request) {
   const { email } = await req.json();
 
