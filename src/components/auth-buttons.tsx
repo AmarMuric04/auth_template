@@ -27,14 +27,12 @@ const AuthButtons = ({
   const [hasToken, setHasToken] = useState(false);
 
   useEffect(() => {
-    const token = document.cookie
-      .split(";")
-      .find((c) => c.trim().startsWith("token="));
-    if (token) {
-      setHasToken(true);
-    } else {
-      setHasToken(false);
-    }
+    const checkToken = async () => {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+      setHasToken(!!data.user);
+    };
+    checkToken();
   }, [session]);
 
   const isAuthenticated = session || hasToken;
