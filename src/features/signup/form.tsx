@@ -1,5 +1,6 @@
 "use client";
 
+import OAuthButtons from "@/components/oauth-buttons";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -141,6 +142,12 @@ export default function SignUpForm(): React.JSX.Element {
           </CardFooter>
         </form>
       </Form>
+      <div className="flex items-center gap-4 my-4 px-6">
+        <div className="flex-1 h-px bg-accent" />
+        <span className="text-accent text-sm">OR</span>
+        <div className="flex-1 h-px bg-accent" />
+      </div>
+      <OAuthButtons />
       <p className="text-center">
         Already have an account? <Link href="/signin">Sign in!</Link>
       </p>
