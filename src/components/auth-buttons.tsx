@@ -1,0 +1,62 @@
+"use client";
+
+import { signOut, useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { Button } from "./ui/button";
+
+type AuthButtonsProps = {
+  auth?: {
+    login: {
+      title: string;
+      url: string;
+    };
+    signup: {
+      title: string;
+      url: string;
+    };
+  };
+};
+
+const AuthButtons = ({
+  auth = {
+    login: { title: "Sign in", url: "/signin" },
+    signup: { title: "Sign up", url: "/signup" },
+  },
+}: AuthButtonsProps) => {
+  const { data: session } = useSession();
+  const [hasToken, setHasToken] = useState(false);
+
+  useEffect(() => {
+    const token = document.cookie
+      .split(";")
+      .find((c) => c.trim().startsWith("token="));
+    if (token) {
+      setHasToken(true);
+    } else {
+      setHasToken(false);
+    }
+  }, [session]);
+
+  const isAuthenticated = session || hasToken;
+
+  return (
+    <div className="flex gap-3 items-center">
+      {!isAuthenticated ? (
+        <>
+          <Button asChild variant="outline">
+            <a href={auth.login.url}>{auth.login.title}</a>
+          </Button>
+          <Button asChild>
+            <a href={auth.signup.url}>{auth.signup.title}</a>
+          </Button>
+        </>
+      ) : (
+        <Button variant="outline" onClick={() => signOut()}>
+          Sign Out
+        </Button>
+      )}
+    </div>
+  );
+};
+
+export default AuthButtons;

@@ -23,6 +23,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ThemeToggle } from "./theme-toggle";
+import AuthButtons from "./auth-buttons";
 
 interface MenuItem {
   title: string;
@@ -40,16 +41,6 @@ interface NavbarProps {
     title: string;
   };
   menu?: MenuItem[];
-  auth?: {
-    login: {
-      title: string;
-      url: string;
-    };
-    signup: {
-      title: string;
-      url: string;
-    };
-  };
 }
 
 const Navbar = ({
@@ -131,10 +122,6 @@ const Navbar = ({
       url: "#",
     },
   ],
-  auth = {
-    login: { title: "Sign in", url: "/signin" },
-    signup: { title: "Sign up", url: "/signup" },
-  },
 }: NavbarProps) => {
   return (
     <section className="py-4 grid place-items-center">
@@ -157,13 +144,8 @@ const Navbar = ({
               </NavigationMenu>
             </div>
           </div>
-          <div className="flex gap-2 items-center">
-            <Button asChild variant="outline" size="sm">
-              <a href={auth.login.url}>{auth.login.title}</a>
-            </Button>
-            <Button asChild size="sm">
-              <a href={auth.signup.url}>{auth.signup.title}</a>
-            </Button>
+          <div className="flex items-center gap-3">
+            <AuthButtons />
             <ThemeToggle />
           </div>
         </nav>
@@ -198,14 +180,7 @@ const Navbar = ({
                   >
                     {menu.map((item) => renderMobileMenuItem(item))}
                   </Accordion>
-                  <div className="flex flex-col gap-3">
-                    <Button asChild variant="outline">
-                      <a href={auth.login.url}>{auth.login.title}</a>
-                    </Button>
-                    <Button asChild>
-                      <a href={auth.signup.url}>{auth.signup.title}</a>
-                    </Button>
-                  </div>
+                  <AuthButtons />
                 </div>
               </SheetContent>
             </Sheet>
