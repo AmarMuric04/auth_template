@@ -31,7 +31,11 @@ export async function POST(req: Request) {
   try {
     await prisma.otpVerification.delete({ where: { id: otp.id } });
 
-    let user = await prisma.user.findFirst({ where: { email } });
+    let user;
+
+    if (type === "signin") {
+      user = await prisma.user.findFirst({ where: { email } });
+    }
 
     if (type === "signup") {
       user = await prisma.user.create({
@@ -41,8 +45,8 @@ export async function POST(req: Request) {
 
     if (!user)
       return NextResponse.json(
-        { success: false, message: "Server error." },
-        { status: 500 }
+        { success: false, message: "No user with that email found." },
+        { status: 404 }
       );
 
     const token = await signJwt({ userId: user.id, email: user.email });
@@ -57,7 +61,8 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       message: "OTP verified.",
-      // user, token
+      user,
+      token,
     });
   } catch (err) {
     console.error("Verify OTP error:", err);
