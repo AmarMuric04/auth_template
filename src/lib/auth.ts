@@ -2,7 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import prisma from "@/lib/prisma";
-import type { Account } from "next-auth";
+import type { Account, Profile } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 
 export const authOptions: NextAuthOptions = {
@@ -46,7 +46,7 @@ export const authOptions: NextAuthOptions = {
           });
         }
 
-        token.userId = user.id;
+        token.userId = user.id.toString();
         token.email = user.email;
       }
 
