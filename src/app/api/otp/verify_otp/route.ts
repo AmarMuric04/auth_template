@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { cookies } from "next/headers";
+import { signJwt } from "@/lib/jwt";
 
 export async function POST(req: Request) {
   const { email, code, type, username, firstName, lastName } = await req.json();
@@ -37,11 +39,20 @@ export async function POST(req: Request) {
       });
     }
 
-    console.log(user);
+    if (!user)
+      return NextResponse.json(
+        { success: false, message: "Server error." },
+        { status: 500 }
+      );
 
-    // TODO: ISSUE SESSION / JWT HERE
-    // e.g.: const token = signJwt({ userId: user.id });
-    // and set as cookie or return in body.
+    const token = await signJwt({ userId: user.id, email: user.email });
+
+    (await cookies()).set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60,
+    });
 
     return NextResponse.json({
       success: true,

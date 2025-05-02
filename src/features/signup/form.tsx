@@ -38,7 +38,7 @@ const formSchema = z.object({
 
 export default function SignUpForm(): React.JSX.Element {
   const router = useRouter();
-  const { authData, setAuthData, setType } = useAuthStore();
+  const { authData, setAuthData, setType, type } = useAuthStore();
 
   useEffect(() => {
     setType("signup");
@@ -61,7 +61,10 @@ export default function SignUpForm(): React.JSX.Element {
     );
 
     if (data.success)
-      await axios.post("/api/otp/send_otp", JSON.stringify({ ...values }));
+      await axios.post(
+        "/api/otp/send_otp",
+        JSON.stringify({ email: values.email, type })
+      );
 
     setAuthData({ ...authData, ...values });
     router.push("/otp");

@@ -7,7 +7,7 @@ const generateOTPCode = () =>
   getRandomNumber(0, 1000000).toString().padStart(6, "0");
 
 export async function POST(req: Request) {
-  const { email } = await req.json();
+  const { email, type } = await req.json();
 
   if (!email || typeof email !== "string") {
     return NextResponse.json(
@@ -16,14 +16,16 @@ export async function POST(req: Request) {
     );
   }
 
-  const userExists = await prisma.user.findFirst({ where: { email } });
+ if (type ==="signin") {
+   const userExists = await prisma.user.findFirst({ where: { email } });
 
-  if (!userExists) {
-    return NextResponse.json(
-      { success: false, message: "No user found with that email." },
-      { status: 404 }
-    );
-  }
+   if (!userExists) {
+     return NextResponse.json(
+       { success: false, message: "No user found with that email." },
+       { status: 404 }
+     );
+   }
+ }
 
   const recent = await prisma.otpVerification.findFirst({
     where: {

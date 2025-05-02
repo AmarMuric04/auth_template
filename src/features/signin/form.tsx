@@ -33,7 +33,7 @@ const formSchema = z.object({
 
 export default function SignInForm(): React.JSX.Element {
   const router = useRouter();
-  const { authData, setAuthData, setType } = useAuthStore();
+  const { authData, setAuthData, setType, type } = useAuthStore();
 
   useEffect(() => {
     setType("signin");
@@ -49,7 +49,7 @@ export default function SignInForm(): React.JSX.Element {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { data } = await axios.post(
       "/api/otp/send_otp",
-      JSON.stringify({ email: values.email })
+      JSON.stringify({ email: values.email, type })
     );
 
     if (data.success) {
