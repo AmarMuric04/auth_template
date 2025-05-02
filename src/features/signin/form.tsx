@@ -25,6 +25,7 @@ import { z } from "zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/use-auth-store";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email" }),
@@ -32,7 +33,11 @@ const formSchema = z.object({
 
 export default function SignInForm(): React.JSX.Element {
   const router = useRouter();
-  const { authData, setAuthData } = useAuthStore();
+  const { authData, setAuthData, setType } = useAuthStore();
+
+  useEffect(() => {
+    setType("signin");
+  }, [setType]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,11 +46,17 @@ export default function SignInForm(): React.JSX.Element {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    axios.post("/api/otp/send_otp", JSON.stringify({ email: values.email }));
-    setAuthData({ ...authData, email: values.email });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const { data } = await axios.post(
+      "/api/otp/send_otp",
+      JSON.stringify({ email: values.email })
+    );
 
-    router.push("/otp");
+    if (data.success) {
+      setAuthData({ ...authData, email: values.email });
+
+      router.push("/otp");
+    }
   }
 
   return (

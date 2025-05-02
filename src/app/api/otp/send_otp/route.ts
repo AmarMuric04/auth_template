@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
 import prisma from "@/lib/prisma";
 import { getRandomNumber } from "@/utility/random-number";
+import { sendVerificationEmail } from "@/utility/send-email";
+
+const generateOTPCode = () =>
+  getRandomNumber(0, 1000000).toString().padStart(6, "0");
 
 export async function POST(req: Request) {
   const { email } = await req.json();
@@ -13,7 +16,15 @@ export async function POST(req: Request) {
     );
   }
 
-  // Throttle OTP requests (1 per minute)
+  const userExists = await prisma.user.findFirst({ where: { email } });
+
+  if (!userExists) {
+    return NextResponse.json(
+      { success: false, message: "No user found with that email." },
+      { status: 404 }
+    );
+  }
+
   const recent = await prisma.otpVerification.findFirst({
     where: {
       email,
@@ -33,29 +44,14 @@ export async function POST(req: Request) {
     );
   }
 
-  const code = getRandomNumber(0, 1000000).toString().padStart(6, "0");
-
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  const code = generateOTPCode();
 
   try {
     await prisma.otpVerification.deleteMany({
       where: { email },
     });
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Your Verification Code",
-      text: `Thanks for choosing us!\n\nYour verification code is: ${code}`,
-    });
+    await sendVerificationEmail(email, code);
 
     await prisma.otpVerification.create({
       data: {

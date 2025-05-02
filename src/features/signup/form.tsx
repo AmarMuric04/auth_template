@@ -23,6 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -37,7 +38,11 @@ const formSchema = z.object({
 
 export default function SignUpForm(): React.JSX.Element {
   const router = useRouter();
-  const { setAuthData } = useAuthStore();
+  const { authData, setAuthData, setType } = useAuthStore();
+
+  useEffect(() => {
+    setType("signup");
+  }, [setType]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,10 +54,16 @@ export default function SignUpForm(): React.JSX.Element {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    axios.post("/api/otp/send_otp", JSON.stringify({ email: values.email }));
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const { data } = await axios.post(
+      "/api/signup",
+      JSON.stringify({ ...values })
+    );
 
-    setAuthData(values);
+    if (data.success)
+      await axios.post("/api/otp/send_otp", JSON.stringify({ ...values }));
+
+    setAuthData({ ...authData, ...values });
     router.push("/otp");
   }
 

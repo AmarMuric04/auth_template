@@ -41,7 +41,7 @@ const formSchema = z.object({
 
 export default function OTPForm(): React.JSX.Element {
   const router = useRouter();
-  const { authData, clearAuthData } = useAuthStore();
+  const { type, authData, clearAuthData } = useAuthStore();
   const isVerifyingRef = useRef(false);
 
   useEffect(() => {
@@ -62,7 +62,8 @@ export default function OTPForm(): React.JSX.Element {
     try {
       const { data } = await axios.post("/api/otp/verify_otp", {
         code: values.code,
-        email: authData.email,
+        type,
+        ...authData,
       });
 
       if (data.success) {
