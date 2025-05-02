@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/use-auth-store";
 import { useEffect } from "react";
 import OAuthButtons from "@/components/oauth-buttons";
+import OrSeparator from "@/components/or-separator";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email" }),
@@ -90,14 +91,16 @@ export default function SignInForm(): React.JSX.Element {
           </CardFooter>
         </form>
       </Form>
-      <div className="flex items-center gap-4 my-4 px-6">
-        <div className="flex-1 h-px bg-accent" />
-        <span className="text-accent text-sm">OR</span>
-        <div className="flex-1 h-px bg-accent" />
-      </div>
+      <OrSeparator />
       <OAuthButtons />
       <p className="text-center">
-        Don&#39;t have an account? <Link href="/signup">Create one!</Link>
+        Don&#39;t have an account?{" "}
+        <Link
+          href="/signup"
+          className="font-medium underline-offset-4 underline"
+        >
+          Create one!
+        </Link>
       </p>
     </Card>
   );

@@ -28,7 +28,6 @@ import { useAuthStore } from "@/store/use-auth-store";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
@@ -138,10 +137,6 @@ export default function OTPForm(): React.JSX.Element {
           </CardFooter>
         </form>
       </Form>
-
-      <p className="text-center">
-        Don&apos;t have an account? <Link href="/signup">Create one!</Link>
-      </p>
     </Card>
   );
 }

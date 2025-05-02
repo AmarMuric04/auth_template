@@ -3,6 +3,7 @@
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
+import axios from "axios";
 
 type AuthButtonsProps = {
   auth?: {
@@ -49,7 +50,14 @@ const AuthButtons = ({
           </Button>
         </>
       ) : (
-        <Button variant="outline" onClick={() => signOut()}>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            await axios.post("/api/signout");
+
+            signOut({ callbackUrl: "/" });
+          }}
+        >
           Sign Out
         </Button>
       )}
