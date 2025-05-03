@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { getRandomNumber } from "@/utility/random-number";
 import { sendVerificationEmail } from "@/utility/send-email";
 

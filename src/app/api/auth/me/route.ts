@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { verifyJwt } from "@/lib/jwt";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   const token = (await cookies()).get("token")?.value;
