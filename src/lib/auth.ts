@@ -1,7 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import type { Account, Profile } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 
