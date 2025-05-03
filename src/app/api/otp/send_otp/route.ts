@@ -16,18 +16,18 @@ export async function POST(req: Request) {
     );
   }
 
- if (type ==="signin") {
-   const userExists = await prisma.user.findFirst({ where: { email } });
+  if (type === "signin") {
+    const userExists = await prisma.user.findUnique({ where: { email } });
 
-   if (!userExists) {
-     return NextResponse.json(
-       { success: false, message: "No user found with that email." },
-       { status: 404 }
-     );
-   }
- }
+    if (!userExists) {
+      return NextResponse.json(
+        { success: false, message: "No user found with that email." },
+        { status: 404 }
+      );
+    }
+  }
 
-  const recent = await prisma.otpVerification.findFirst({
+  const recent = await prisma.otpVerification.findUnique({
     where: {
       email,
       createdAt: {

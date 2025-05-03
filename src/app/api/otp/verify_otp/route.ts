@@ -12,13 +12,12 @@ export async function POST(req: Request) {
     );
   }
 
-  const otp = await prisma.otpVerification.findFirst({
+  const otp = await prisma.otpVerification.findUnique({
     where: {
       email,
       code,
       expiresAt: { gte: new Date() },
     },
-    orderBy: { createdAt: "desc" },
   });
 
   if (!otp) {
@@ -34,7 +33,7 @@ export async function POST(req: Request) {
     let user;
 
     if (type === "signin") {
-      user = await prisma.user.findFirst({ where: { email } });
+      user = await prisma.user.findUnique({ where: { email } });
     }
 
     if (type === "signup") {

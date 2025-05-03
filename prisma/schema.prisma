@@ -9,7 +9,7 @@ datasource db {
 
 model OtpVerification {
   id        Int      @id @default(autoincrement())
-  email     String
+  email     String   @unique
   code      String
   expiresAt DateTime
   createdAt DateTime @default(now())
@@ -17,7 +17,7 @@ model OtpVerification {
 
 model user {
   id        Int      @id @default(autoincrement())
-  email     String
+  email     String   @unique
   username  String
   firstName String
   lastName  String

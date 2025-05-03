@@ -8,6 +8,7 @@ import Github from "../../logos/github";
 import { ReactNode } from "react";
 import Screenshot from "../../ui/screenshot";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface HeroButtonProps {
   href: string;
@@ -31,9 +32,9 @@ export default function Hero({
   description = "Professionally designed blocks and templates built with React, Shadcn/ui and Tailwind that will help your product stand out.",
   mockup = (
     <Screenshot
-      srcLight="/app-light.png"
-      srcDark="/app-dark.png"
-      alt="Launch UI app screenshot"
+      srcLight="/light-application.PNG"
+      srcDark="/dark-application.PNG"
+      alt="App screenshot"
       width={1248}
       height={765}
       className="w-full"
@@ -42,22 +43,22 @@ export default function Hero({
   badge = (
     <Badge variant="outline" className="animate-appear">
       <span className="text-muted-foreground">
-        New version of Launch UI is out!
+        New version of Our App is out!
       </span>
-      <a href="https://www.launchuicomponents.com/" className="flex items-center gap-1">
+      <Link href="/" className="flex items-center gap-1">
         Get started
         <ArrowRightIcon className="size-3" />
-      </a>
+      </Link>
     </Badge>
   ),
   buttons = [
     {
-      href: "https://www.launchuicomponents.com/",
+      href: "/",
       text: "Get Started",
       variant: "default",
     },
     {
-      href: "https://www.launchuicomponents.com/",
+      href: "/",
       text: "Github",
       variant: "glow",
       icon: <Github className="mr-2 size-4" />,
@@ -69,7 +70,7 @@ export default function Hero({
     <Section
       className={cn(
         "fade-bottom overflow-hidden pb-0 sm:pb-0 md:pb-0",
-        className,
+        className
       )}
     >
       <div className="max-w-container mx-auto flex flex-col gap-12 pt-16 sm:gap-24">

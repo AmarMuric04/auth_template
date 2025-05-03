@@ -22,7 +22,7 @@ export default function CTA({
   title = "Start building",
   buttons = [
     {
-      href: "https://www.launchuicomponents.com/",
+      href: "/",
       text: "Get Started",
       variant: "default",
     },

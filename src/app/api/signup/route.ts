@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     const { email } = parsed.data;
 
-    const alreadyExists = await prisma.user.findFirst({
+    const alreadyExists = await prisma.user.findUnique({
       where: { email },
     });
 

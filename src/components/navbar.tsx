@@ -1,4 +1,4 @@
-import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
+import { Book, Image, Menu, Sunset, Trees, Zap } from "lucide-react";
 
 import {
   Accordion,
@@ -36,7 +36,6 @@ interface MenuItem {
 interface NavbarProps {
   logo?: {
     url: string;
-    src: string;
     alt: string;
     title: string;
   };
@@ -45,10 +44,9 @@ interface NavbarProps {
 
 const Navbar = ({
   logo = {
-    url: "https://www.shadcnblocks.com",
-    src: "https://shadcnblocks.com/images/block/logos/shadcnblockscom-icon.svg",
+    url: "/",
     alt: "logo",
-    title: "Shadcnblocks.com",
+    title: "Boilerplate",
   },
   menu = [
     { title: "Home", url: "#" },
@@ -131,7 +129,7 @@ const Navbar = ({
           <div className="flex items-center gap-6">
             {/* Logo */}
             <a href={logo.url} className="flex items-center gap-2">
-              <img src={logo.src} className="max-h-8" alt={logo.alt} />
+              <Image />
               <span className="text-lg font-semibold tracking-tighter">
                 {logo.title}
               </span>
@@ -154,9 +152,7 @@ const Navbar = ({
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <a href={logo.url} className="flex items-center gap-2">
-              <img src={logo.src} className="max-h-8" alt={logo.alt} />
-            </a>
+            <Image />
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -166,9 +162,7 @@ const Navbar = ({
               <SheetContent className="overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle>
-                    <a href={logo.url} className="flex items-center gap-2">
-                      <img src={logo.src} className="max-h-8" alt={logo.alt} />
-                    </a>
+                    <Image />
                   </SheetTitle>
                 </SheetHeader>
 
