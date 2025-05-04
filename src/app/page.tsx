@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Welcome to the home page!",
 };
 
-export default async function ProfileForm() {
+export default function HomePage() {
   return (
     <main className="h-screen">
       <Navbar />

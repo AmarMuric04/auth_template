@@ -29,9 +29,8 @@ const AuthButtons = ({
 
   useEffect(() => {
     const checkToken = async () => {
-      const res = await fetch("/api/auth/me");
-      const data = await res.json();
-      setHasToken(!!data.user);
+      const response = await axios.get("/api/auth/me");
+      setHasToken(!!response.data.user);
     };
     checkToken();
   }, [session]);

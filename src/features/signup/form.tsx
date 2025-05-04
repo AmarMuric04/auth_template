@@ -27,15 +27,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z.object({
   username: z.string().min(2, {
     message: "Username must be at least 2 characters.",
   }),
-  email: z.string().email({ message: "Please enter a valid email" }),
-  firstName: z.string().min(1, { message: "Field can't be empty." }),
-  lastName: z.string().min(1, { message: "Field can't be empty." }),
+  email: z.string().email({ message: "Please enter a valid email." }),
+  firstName: z.string().min(1, { message: "First name is required." }),
+  lastName: z.string().min(1, { message: "Last name is required." }),
 });
 
 export default function SignUpForm(): React.JSX.Element {
@@ -62,14 +63,17 @@ export default function SignUpForm(): React.JSX.Element {
       JSON.stringify({ ...values })
     );
 
-    if (data.success)
+    if (data.success) {
       await axios.post(
         "/api/otp/send_otp",
         JSON.stringify({ email: values.email, type })
       );
 
-    setAuthData({ ...authData, ...values });
-    router.push("/otp");
+      setAuthData({ ...authData, ...values });
+
+      toast.success("We sent a code to your email");
+      router.push("/otp");
+    }
   }
 
   return (
@@ -79,7 +83,11 @@ export default function SignUpForm(): React.JSX.Element {
         <CardDescription>Please fill out the form</CardDescription>
       </CardHeader>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8"
+          data-testid="signup-form"
+        >
           <CardContent className="space-y-4">
             <FormField
               control={form.control}

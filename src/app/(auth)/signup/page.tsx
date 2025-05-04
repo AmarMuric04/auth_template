@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Create an account",
 };
 
-export default async function ProfileForm() {
+export default function SignupPage() {
   return (
     <main className="grid place-items-center h-screen">
       <SignUpForm />

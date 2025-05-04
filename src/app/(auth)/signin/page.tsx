@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Enter your credentials and sign in",
 };
 
-export default async function ProfileForm() {
+export default function SigninPage() {
   return (
     <main className="grid place-items-center h-screen">
       <SignInForm />
