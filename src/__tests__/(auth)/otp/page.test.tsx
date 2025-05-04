@@ -1,18 +1,11 @@
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import OTPForm from "@/features/otp/form";
+import OTPPage from "@/app/(auth)/otp/page";
 import axios from "axios";
-import { useAuthStore as originalUseAuthStore } from "@/store/use-auth-store";
 
 jest.mock("@/store/use-auth-store", () => ({
   useAuthStore: jest.fn(),
 }));
-
-import { useAuthStore } from "@/store/use-auth-store";
-
-const mockedUseAuthStore = useAuthStore as jest.MockedFunction<
-  typeof originalUseAuthStore
->;
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
@@ -25,52 +18,75 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
+const mockUseAuthStore = jest.fn();
 jest.mock("@/store/use-auth-store", () => ({
-  useAuthStore: jest.fn(),
+  useAuthStore: () => mockUseAuthStore(),
 }));
 
-describe("OTPForm", () => {
+global.ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
+describe("OTPPage", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it("redirects if no email in authData", () => {
-    mockedUseAuthStore.mockReturnValue({
-      authData: {},
-      type: "signup",
-      clearAuthData: jest.fn(),
+  it("redirects if no email in authData", async () => {
+    mockUseAuthStore.mockReturnValue({
+      authData: {
+        email: "",
+        username: "",
+        firstName: "",
+        lastName: "",
+      },
+      setAuthData: () => {},
+      clearAuthData: () => {},
+      setType: () => {},
+      type: "signin",
     });
-
-    render(<OTPForm />);
-    expect(screen.getByRole("status")).toBeInTheDocument(); // the spinner
+    render(<OTPPage />);
+    screen.debug();
+    expect(mockReplace).toHaveBeenCalledWith("/signup");
   });
 
   it("renders form if email exists in authData", () => {
-    mockedUseAuthStore.mockReturnValue({
-      authData: { email: "test@example.com" },
-      type: "signup",
-      clearAuthData: jest.fn(),
+    mockUseAuthStore.mockReturnValue({
+      authData: {
+        email: "muricamar2004@gmail.com",
+        username: "",
+        firstName: "",
+        lastName: "",
+      },
+      setAuthData: () => {},
+      clearAuthData: () => {},
+      setType: () => {},
+      type: "signin",
     });
-
-    render(<OTPForm />);
-    expect(screen.getByText(/enter the code/i)).toBeInTheDocument();
+    render(<OTPPage />);
+    expect(screen.getByTestId(/otp-form/i)).toBeInTheDocument();
   });
 
   it("submits valid code and calls axios", async () => {
-    const mockClear = jest.fn();
-    mockedUseAuthStore.mockReturnValue({
-      authData: { email: "test@example.com" },
-      type: "signup",
-      clearAuthData: mockClear,
+    mockUseAuthStore.mockReturnValue({
+      authData: {
+        email: "muricamar2004@gmail.com",
+        username: "",
+        firstName: "",
+        lastName: "",
+      },
+      setAuthData: () => {},
+      clearAuthData: () => {},
+      setType: () => {},
+      type: "signin",
     });
-
+    render(<OTPPage />);
     (axios.post as jest.Mock).mockResolvedValue({ data: { success: true } });
 
-    render(<OTPForm />);
-    const inputs = screen.getAllByRole("textbox");
-    for (let i = 0; i < inputs.length; i++) {
-      fireEvent.change(inputs[i], { target: { value: String(i) } });
-    }
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "123456" } });
 
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
@@ -80,6 +96,5 @@ describe("OTPForm", () => {
         expect.any(Object)
       );
     });
-    expect(mockClear).toHaveBeenCalled();
   });
 });

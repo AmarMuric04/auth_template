@@ -80,7 +80,10 @@ export default function OTPForm(): React.JSX.Element {
 
   if (!authData.email) {
     return (
-      <div className="grid place-items-center h-screen animate-spin">
+      <div
+        data-testid="loader"
+        className="grid place-items-center h-screen animate-spin"
+      >
         <Loader2 />
       </div>
     );
@@ -94,7 +97,11 @@ export default function OTPForm(): React.JSX.Element {
       </CardHeader>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8"
+          data-testid="otp-form"
+        >
           <CardContent className="space-y-4">
             <FormField
               control={form.control}

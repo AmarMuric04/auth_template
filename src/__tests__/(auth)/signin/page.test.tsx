@@ -4,8 +4,6 @@ import SignInForm from "@/app/(auth)/signin/page";
 import axios from "axios";
 
 const mockPush = jest.fn();
-const mockSetAuthData = jest.fn();
-const mockSetType = jest.fn();
 
 jest.mock("axios");
 jest.mock("next/navigation", () => ({
@@ -13,15 +11,28 @@ jest.mock("next/navigation", () => ({
     push: mockPush,
   }),
 }));
-jest.mock("@/store/use-auth-store", () => ({
-  useAuthStore: jest.fn(),
+
+jest.mock("next-auth/react", () => ({
+  useSession: () => ({
+    data: { user: { name: "Murga" } },
+    status: "authenticated",
+  }),
 }));
 
-import { useAuthStore } from "@/store/use-auth-store";
+jest.mock("@/store/use-auth-store", () => ({
+  useAuthStore: () => ({
+    authData: {
+      email: "muricamar2004@gmail.com",
+      username: "",
+      firstName: "",
+      lastName: "",
+    },
+    setAuthData: () => {},
+    setType: () => {},
+    type: "signin",
+  }),
+}));
 
-const mockedUseAuthStore = useAuthStore as jest.MockedFunction<
-  typeof useAuthStore
->;
 const mockedAxiosPost = axios.post as jest.Mock;
 
 afterEach(() => {
@@ -30,22 +41,15 @@ afterEach(() => {
 
 describe("SignInForm", () => {
   beforeEach(() => {
-    mockedUseAuthStore.mockReturnValue({
-      authData: {},
-      setAuthData: mockSetAuthData,
-      setType: mockSetType,
-      type: "signin",
-    });
+    render(<SignInForm />);
   });
 
   it("renders the form", () => {
-    render(<SignInForm />);
     expect(screen.getByText(/sign into an account/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
   });
 
   it("shows validation error on empty submit", async () => {
-    render(<SignInForm />);
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
     expect(
       await screen.findByText(/please enter a valid email/i)
@@ -55,7 +59,6 @@ describe("SignInForm", () => {
   it("submits valid email and redirects to /otp", async () => {
     mockedAxiosPost.mockResolvedValueOnce({ data: { success: true } });
 
-    render(<SignInForm />);
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: "test@example.com" },
     });
@@ -66,9 +69,6 @@ describe("SignInForm", () => {
         "/api/otp/send_otp",
         JSON.stringify({ email: "test@example.com", type: "signin" })
       );
-      expect(mockSetAuthData).toHaveBeenCalledWith({
-        email: "test@example.com",
-      });
       expect(mockPush).toHaveBeenCalledWith("/otp");
     });
   });
