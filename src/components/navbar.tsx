@@ -1,4 +1,4 @@
-import { Book, Image, Menu, Sunset, Trees, Zap } from "lucide-react";
+import { Book, Bot, Image, Menu, Sunset, Trees, Zap } from "lucide-react";
 
 import {
   Accordion,
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/sheet";
 import { ThemeToggle } from "./theme-toggle";
 import AuthButtons from "./auth-buttons";
+import { Chat } from "./ai-chat";
 
 interface MenuItem {
   title: string;
@@ -143,6 +144,20 @@ const Navbar = ({
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Chat
+              title="Web App AI Agent"
+              description="Ask me anything related to the application! I can help with information, giving advice, navigating and more!"
+              placeholder="Ask a question..."
+              configKey="default"
+              pos={{
+                side: "top",
+                align: "center",
+              }}
+            >
+              <button className="rounded-full h-8 w-8 bg-primary text-primary-foreground grid place-items-center">
+                <Bot size={18} />
+              </button>
+            </Chat>
             <AuthButtons />
             <ThemeToggle />
           </div>
