@@ -7,7 +7,13 @@ export async function POST(req: Request) {
   const { email, code, type, username, firstName, lastName } = await req.json();
   if (!email || !code || !["signup", "signin"].includes(type)) {
     return NextResponse.json(
-      { success: false, message: "Missing or invalid parameters." },
+      {
+        success: false,
+        message: "Missing or invalid parameters",
+        errors: {
+          code: "Missing or invalid parameters",
+        },
+      },
       { status: 400 }
     );
   }
@@ -22,7 +28,13 @@ export async function POST(req: Request) {
 
   if (!otp) {
     return NextResponse.json(
-      { success: false, message: "Invalid or expired OTP." },
+      {
+        success: false,
+        message: "Invalid or expired OTP",
+        errors: {
+          code: "Invalid or expired OTP",
+        },
+      },
       { status: 400 }
     );
   }
@@ -44,7 +56,13 @@ export async function POST(req: Request) {
 
     if (!user)
       return NextResponse.json(
-        { success: false, message: "No user with that email found." },
+        {
+          success: false,
+          message: "No user with that email found",
+          errors: {
+            code: "No user with that email found",
+          },
+        },
         { status: 404 }
       );
 

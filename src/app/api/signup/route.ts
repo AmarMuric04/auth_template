@@ -37,6 +37,9 @@ export async function POST(req: NextRequest) {
         {
           success: false,
           message: "Invalid input",
+          errors: {
+            email: "Email is already in use",
+          },
         },
         { status: 409 }
       );

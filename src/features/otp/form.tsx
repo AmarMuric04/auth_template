@@ -25,14 +25,19 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { useAuthStore } from "@/store/use-auth-store";
-
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+interface APIErrorResponse {
+  errors: Record<string, string>;
+}
 
 const formSchema = z.object({
   code: z.string().min(6, { message: "Enter the full 6-digit code" }),
@@ -41,10 +46,9 @@ const formSchema = z.object({
 export default function OTPForm(): React.JSX.Element {
   const router = useRouter();
   const { type, authData, clearAuthData } = useAuthStore();
-  const isVerifyingRef = useRef(false);
 
   useEffect(() => {
-    if (!authData.email && !isVerifyingRef.current) {
+    if (!authData.email) {
       router.replace("/signup");
     }
   }, [authData, router]);
@@ -56,26 +60,36 @@ export default function OTPForm(): React.JSX.Element {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    isVerifyingRef.current = true;
-    try {
-      const { data } = await axios.post("/api/otp/verify_otp", {
+  const mutation = useMutation({
+    mutationFn: (values: z.infer<typeof formSchema>) =>
+      axios.post("/api/otp/verify_otp", {
         code: values.code,
         type,
         ...authData,
-      });
-
+      }),
+    onSuccess: async ({ data }) => {
       if (data.success) {
-        await router.push("/");
         clearAuthData();
-      } else {
-        console.log("Wrong code!");
-        isVerifyingRef.current = false;
+        await router.push("/");
       }
-    } catch (err) {
-      console.error(err);
-      isVerifyingRef.current = false;
-    }
+    },
+    onError: (error: AxiosError<APIErrorResponse>) => {
+      if (error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        Object.entries(errors).forEach(([field, message]) => {
+          form.setError(field as keyof z.infer<typeof formSchema>, {
+            type: "server",
+            message,
+          });
+        });
+      } else {
+        toast.error("Something went wrong");
+      }
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    mutation.mutate(values);
   }
 
   if (!authData.email) {
@@ -138,8 +152,15 @@ export default function OTPForm(): React.JSX.Element {
           </CardContent>
 
           <CardFooter>
-            <Button className="w-full" type="submit">
-              Submit
+            <Button
+              className="w-full flex gap-2"
+              type="submit"
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending && (
+                <Loader2 size={16} className="animate-spin" />
+              )}
+              {mutation.isPending ? "Verifying..." : "Verify"}
             </Button>
           </CardFooter>
         </form>

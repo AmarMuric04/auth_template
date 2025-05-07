@@ -22,12 +22,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/use-auth-store";
 import { useEffect } from "react";
 import OAuthButtons from "@/components/oauth-buttons";
 import OrSeparator from "@/components/or-separator";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+
+interface APIErrorResponse {
+  errors: Record<string, string>;
+}
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email" }),
@@ -48,17 +55,35 @@ export default function SignInForm(): React.JSX.Element {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { data } = await axios.post(
-      "/api/otp/send_otp",
-      JSON.stringify({ email: values.email, type })
-    );
+  const mutation = useMutation({
+    mutationFn: (values: z.infer<typeof formSchema>) =>
+      axios.post("/api/otp/send_otp", {
+        email: values.email,
+        type,
+      }),
+    onSuccess: ({ data }) => {
+      if (data.success) {
+        setAuthData({ ...authData, email: form.getValues().email });
+        router.push("/otp");
+      }
+    },
+    onError: (error: AxiosError<APIErrorResponse>) => {
+      if (error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        Object.entries(errors).forEach(([field, message]) => {
+          form.setError(field as keyof z.infer<typeof formSchema>, {
+            type: "server",
+            message,
+          });
+        });
+      } else {
+        toast.error("Something went wrong");
+      }
+    },
+  });
 
-    if (data.success) {
-      setAuthData({ ...authData, email: values.email });
-
-      router.push("/otp");
-    }
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    mutation.mutate(values);
   }
 
   return (
@@ -85,8 +110,15 @@ export default function SignInForm(): React.JSX.Element {
             />
           </CardContent>
           <CardFooter>
-            <Button className="w-full" type="submit">
-              Submit
+            <Button
+              className="w-full flex gap-2"
+              type="submit"
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending && (
+                <Loader2 size={16} className="animate-spin" />
+              )}
+              {mutation.isPending ? "Submitting..." : "Submit"}
             </Button>
           </CardFooter>
         </form>

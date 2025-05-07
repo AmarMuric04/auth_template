@@ -22,13 +22,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/use-auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
+import axios, { AxiosError } from "axios";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+
+interface APIErrorResponse {
+  errors: Record<string, string>;
+}
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -57,24 +63,40 @@ export default function SignUpForm(): React.JSX.Element {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { data } = await axios.post(
-      "/api/signup",
-      JSON.stringify({ ...values })
-    );
+  const mutation = useMutation({
+    mutationFn: async (values: z.infer<typeof formSchema>) => {
+      const { data } = await axios.post("/api/signup", JSON.stringify(values), {
+        headers: { "Content-Type": "application/json" },
+      });
 
-    if (data.success) {
-      await axios.post(
-        "/api/otp/send_otp",
-        JSON.stringify({ email: values.email, type })
-      );
+      if (data.success) {
+        await axios.post(
+          "/api/otp/send_otp",
+          JSON.stringify({ email: values.email, type }),
+          { headers: { "Content-Type": "application/json" } }
+        );
+        setAuthData({ ...authData, ...values });
+        router.push("/otp");
+        return "success";
+      }
 
-      setAuthData({ ...authData, ...values });
-
-      toast.success("We sent a code to your email");
-      router.push("/otp");
-    }
-  }
+      throw new Error("Signup failed");
+    },
+    onSuccess: () => toast.success("We sent a code to your email"),
+    onError: (error: AxiosError<APIErrorResponse>) => {
+      if (error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        Object.entries(errors).forEach(([field, message]) => {
+          form.setError(field as keyof z.infer<typeof formSchema>, {
+            type: "server",
+            message,
+          });
+        });
+      } else {
+        toast.error("Something went wrong");
+      }
+    },
+  });
 
   return (
     <Card className="w-[450px] glass-3">
@@ -84,7 +106,7 @@ export default function SignUpForm(): React.JSX.Element {
       </CardHeader>
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
           className="space-y-8"
           data-testid="signup-form"
         >
@@ -145,8 +167,15 @@ export default function SignUpForm(): React.JSX.Element {
             />
           </CardContent>
           <CardFooter>
-            <Button className="w-full" type="submit">
-              Submit
+            <Button
+              className="w-full flex gap-2"
+              type="submit"
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending && (
+                <Loader2 size={16} className="animate-spin" />
+              )}
+              {mutation.isPending ? "Submitting..." : "Submit"}
             </Button>
           </CardFooter>
         </form>

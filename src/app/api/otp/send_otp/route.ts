@@ -11,7 +11,13 @@ export async function POST(req: Request) {
 
   if (!email || typeof email !== "string") {
     return NextResponse.json(
-      { success: false, message: "Invalid email" },
+      {
+        success: false,
+        message: "Invalid email",
+        errors: {
+          email: "Invalid email",
+        },
+      },
       { status: 400 }
     );
   }
@@ -21,7 +27,11 @@ export async function POST(req: Request) {
 
     if (!userExists) {
       return NextResponse.json(
-        { success: false, message: "No user found with that email." },
+        {
+          success: false,
+          message: "No user found with that email",
+          errors: { email: "No users found with that email" },
+        },
         { status: 404 }
       );
     }
@@ -40,7 +50,10 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: false,
-        message: "Please wait before requesting another code.",
+        message: "Please wait before requesting another code",
+        errors: {
+          code: "Please wait before requesting another code",
+        },
       },
       { status: 429 }
     );
