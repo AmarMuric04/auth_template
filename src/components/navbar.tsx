@@ -154,7 +154,7 @@ const Navbar = ({
                 align: "center",
               }}
             >
-              <button className="rounded-full h-8 w-8 bg-primary text-primary-foreground grid place-items-center">
+              <button className="rounded-sm h-9 w-9 bg-background border border-accent hover:bg-accent transition-all text-accent-foreground grid place-items-center">
                 <Bot size={18} />
               </button>
             </Chat>
