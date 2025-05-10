@@ -80,6 +80,8 @@ export default function SignInForm(): React.JSX.Element {
         toast.error("Something went wrong");
       }
     },
+    retry: 10,
+    retryDelay: 500,
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {

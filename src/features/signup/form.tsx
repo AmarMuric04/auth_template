@@ -96,6 +96,8 @@ export default function SignUpForm(): React.JSX.Element {
         toast.error("Something went wrong");
       }
     },
+    retry: 10,
+    retryDelay: 500,
   });
 
   return (
