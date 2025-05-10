@@ -81,7 +81,7 @@ export default function SignInForm(): React.JSX.Element {
       }
     },
     retry: 10,
-    retryDelay: 500,
+    retryDelay: 1000,
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {

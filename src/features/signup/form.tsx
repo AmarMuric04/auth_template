@@ -97,7 +97,7 @@ export default function SignUpForm(): React.JSX.Element {
       }
     },
     retry: 10,
-    retryDelay: 500,
+    retryDelay: 1000,
   });
 
   return (
