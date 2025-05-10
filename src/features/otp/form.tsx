@@ -30,7 +30,7 @@ import axios, { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -46,9 +46,10 @@ const formSchema = z.object({
 export default function OTPForm(): React.JSX.Element {
   const router = useRouter();
   const { type, authData, clearAuthData } = useAuthStore();
+  const isVerifyingRef = useRef(false);
 
   useEffect(() => {
-    if (!authData.email) {
+    if (!authData.email && !isVerifyingRef.current) {
       router.replace("/signup");
     }
   }, [authData, router]);
@@ -61,19 +62,22 @@ export default function OTPForm(): React.JSX.Element {
   });
 
   const mutation = useMutation({
-    mutationFn: (values: z.infer<typeof formSchema>) =>
-      axios.post("/api/otp/verify_otp", {
+    mutationFn: (values: z.infer<typeof formSchema>) => {
+      isVerifyingRef.current = true;
+      return axios.post("/api/otp/verify_otp", {
         code: values.code,
         type,
         ...authData,
-      }),
+      });
+    },
     onSuccess: async ({ data }) => {
       if (data.success) {
         clearAuthData();
-        await router.push("/");
+        isVerifyingRef.current = false;
       }
     },
     onError: (error: AxiosError<APIErrorResponse>) => {
+      isVerifyingRef.current = false;
       if (error.response?.data?.errors) {
         const errors = error.response.data.errors;
         Object.entries(errors).forEach(([field, message]) => {
