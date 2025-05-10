@@ -8,6 +8,8 @@ export async function GET() {
     return Response.json({ user: null }, { status: 401 });
   }
 
+  console.log("123");
+
   try {
     const payload = (await verifyJwt(token)) as { userId: number };
     const user = await prisma.user.findUnique({

@@ -1,9 +1,9 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
-import { Button } from "./ui/button";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { Button } from "./ui/button";
 
 type AuthButtonsProps = {
   auth?: {
@@ -25,17 +25,20 @@ const AuthButtons = ({
   },
 }: AuthButtonsProps) => {
   const { data: session } = useSession();
-  const [hasToken, setHasToken] = useState(false);
 
-  useEffect(() => {
-    const checkToken = async () => {
+  const { data, isLoading } = useQuery({
+    queryKey: ["authUser"],
+    queryFn: async () => {
       const response = await axios.get("/api/auth/me");
-      setHasToken(!!response.data.user);
-    };
-    checkToken();
-  }, [session]);
 
-  const isAuthenticated = session || hasToken;
+      return response.data;
+    },
+    staleTime: 60 * 1000,
+  });
+
+  const isAuthenticated = !!session || !!data?.user;
+
+  if (isLoading) return null;
 
   return (
     <div className="flex gap-3 items-center">
@@ -53,7 +56,6 @@ const AuthButtons = ({
           variant="outline"
           onClick={async () => {
             await axios.post("/api/signout");
-
             signOut({ callbackUrl: "/" });
           }}
         >

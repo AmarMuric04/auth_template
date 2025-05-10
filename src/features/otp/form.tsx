@@ -30,7 +30,7 @@ import axios, { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -46,13 +46,6 @@ const formSchema = z.object({
 export default function OTPForm(): React.JSX.Element {
   const router = useRouter();
   const { type, authData, clearAuthData } = useAuthStore();
-  const isVerifyingRef = useRef(false);
-
-  useEffect(() => {
-    if (!authData.email && !isVerifyingRef.current) {
-      router.replace("/signup");
-    }
-  }, [authData, router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -63,7 +56,6 @@ export default function OTPForm(): React.JSX.Element {
 
   const mutation = useMutation({
     mutationFn: (values: z.infer<typeof formSchema>) => {
-      isVerifyingRef.current = true;
       return axios.post("/api/otp/verify_otp", {
         code: values.code,
         type,
@@ -73,11 +65,9 @@ export default function OTPForm(): React.JSX.Element {
     onSuccess: async ({ data }) => {
       if (data.success) {
         clearAuthData();
-        isVerifyingRef.current = false;
       }
     },
     onError: (error: AxiosError<APIErrorResponse>) => {
-      isVerifyingRef.current = false;
       if (error.response?.data?.errors) {
         const errors = error.response.data.errors;
         Object.entries(errors).forEach(([field, message]) => {
@@ -92,11 +82,17 @@ export default function OTPForm(): React.JSX.Element {
     },
   });
 
+  useEffect(() => {
+    if (!authData.email && !mutation.isPending) {
+      router.replace("/signup");
+    }
+  }, [authData.email, mutation.isPending, router]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     mutation.mutate(values);
   }
 
-  if (!authData.email) {
+  if (!authData.email && !mutation.isPending) {
     return (
       <div
         data-testid="loader"
