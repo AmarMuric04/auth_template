@@ -125,10 +125,8 @@ const Navbar = ({
   return (
     <section className="py-4 grid place-items-center">
       <div className="container">
-        {/* Desktop Menu */}
         <nav className="hidden justify-between lg:flex">
           <div className="flex items-center gap-6">
-            {/* Logo */}
             <a href={logo.url} className="flex items-center gap-2">
               <Image />
               <span className="text-lg font-semibold tracking-tighter">
@@ -163,7 +161,6 @@ const Navbar = ({
           </div>
         </nav>
 
-        {/* Mobile Menu */}
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
             {/* Logo */}
