@@ -30,7 +30,7 @@ import axios, { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -46,6 +46,7 @@ const formSchema = z.object({
 export default function OTPForm(): React.JSX.Element {
   const router = useRouter();
   const { type, authData, clearAuthData } = useAuthStore();
+  const isVerifyingRef = useRef(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,6 +57,7 @@ export default function OTPForm(): React.JSX.Element {
 
   const mutation = useMutation({
     mutationFn: (values: z.infer<typeof formSchema>) => {
+      isVerifyingRef.current = true;
       return axios.post("/api/otp/verify_otp", {
         code: values.code,
         type,
@@ -65,6 +67,7 @@ export default function OTPForm(): React.JSX.Element {
     onSuccess: async ({ data }) => {
       if (data.success) {
         clearAuthData();
+        router.replace("/");
       }
     },
     onError: (error: AxiosError<APIErrorResponse>) => {
@@ -80,19 +83,22 @@ export default function OTPForm(): React.JSX.Element {
         toast.error("Something went wrong");
       }
     },
+    onSettled: () => {
+      isVerifyingRef.current = false;
+    },
   });
 
   useEffect(() => {
-    if (!authData.email && !mutation.isPending) {
+    if (!authData.email && !isVerifyingRef.current) {
       router.replace("/signup");
     }
-  }, [authData.email, mutation.isPending, router]);
+  }, [authData.email, isVerifyingRef, router]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     mutation.mutate(values);
   }
 
-  if (!authData.email && !mutation.isPending) {
+  if (!authData.email && !isVerifyingRef.current) {
     return (
       <div
         data-testid="loader"
