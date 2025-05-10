@@ -24,7 +24,7 @@ const AuthButtons = ({
     signup: { title: "Sign up", url: "/signup" },
   },
 }: AuthButtonsProps) => {
-  const { data: session } = useSession();
+  const { status } = useSession();
 
   const { data, isLoading } = useQuery({
     queryKey: ["authUser"],
@@ -33,12 +33,14 @@ const AuthButtons = ({
 
       return response.data;
     },
-    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5,
+    enabled: status === "unauthenticated",
   });
 
-  const isAuthenticated = !!session || !!data?.user;
+  const isAuthenticated = status === "authenticated" || !!data?.user;
 
-  if (isLoading) return null;
+  if (isLoading || status === "loading") return null;
 
   return (
     <div className="flex gap-3 items-center">
